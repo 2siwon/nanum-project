@@ -1,9 +1,12 @@
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import models
 
-from posts.models.answer import Answer
-from posts.models.question import Question
+
+__all__ =(
+    'QuestionComment',
+    'AnswerComment',
+    'NestedComment',
+)
 
 
 class Comment(models.Model):
@@ -12,9 +15,10 @@ class Comment(models.Model):
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
     )
-    comment = models.TextField(
+    content = models.TextField(
         max_length=2000,
     )
     created_at = models.DateTimeField(
@@ -23,6 +27,7 @@ class Comment(models.Model):
     modified_at = models.DateTimeField(
         auto_now=True,
     )
+
     # like = models.ManyToManyField(
     #     User,
     #     on_delete=models.CASCADE,
@@ -35,6 +40,7 @@ class Comment(models.Model):
     class Meta:
         abstract = True
 
+
 class QuestionComment(Comment):
     """
     질문에 대한 댓글
@@ -45,6 +51,7 @@ class QuestionComment(Comment):
         related_name='comments'
     )
 
+
 class AnswerComment(Comment):
     """
     답변에 대한 댓글
@@ -54,6 +61,7 @@ class AnswerComment(Comment):
         on_delete=models.CASCADE,
         related_name='comments'
     )
+
 
 class NestedComment(Comment):
     """

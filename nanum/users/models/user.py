@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
             raise ValueError('The given email or facebook_user_id must be set')
 
         # email, facebook_user_id 둘 중 하나의 값이 None이 아닌 경우
-        # 만일 None인 값이 있으면 이를 ''로 바꿔준다 (필드 null=False이기 때문)
+        # 만일 None인 값이 있으면 이를 ''로 바꿔준다 (필드 null=False이기 때문이다)
         facebook_user_id = facebook_user_id or ''
         email = self.normalize_email(email)
 
@@ -86,16 +86,147 @@ class User(AbstractBaseUser, PermissionsMixin):
     # 이름
     name = models.CharField(_('full name'), max_length=30)
 
+    # 다대다 관계
+
+    # 1. 유저 팔로우
+
+    # 내가 팔로우 하는 유저들
+    following = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        # admin에서 실험하기 위해서
+        blank=True,
+        # 나를 팔로우 하는 유저들
+        related_name='followers',
+        through='UserFollow',
+        # (source, target) 순서
+        through_fields=('user', 'target'),
+    )
+
+    # 2. 주제 팔로우
+
     # 전문분야 주제
     topic_expertise = models.ManyToManyField(
         'topics.Topic',
         related_name='users_with_expertise',
+        blank=True,
+        through='TopicExpertiseFollow',
+        through_fields=('user', 'topic'),
     )
 
     # 관심분야 주제
     topic_interests = models.ManyToManyField(
         'topics.Topic',
         related_name='users_with_interest',
+        blank=True,
+        through='TopicInterestFollow',
+        through_fields=('user', 'topic'),
+    )
+
+    # 3. 질문 팔로우
+    following_questions = models.ManyToManyField(
+        'posts.Question',
+        related_name='followers',
+        blank=True,
+        through='QuestionFollow',
+        through_fields=('user', 'question'),
+    )
+
+    # 4. 질문 북마크
+    bookmarked_questions = models.ManyToManyField(
+        'posts.Question',
+        related_name='who_bookmarked',
+        blank=True,
+        through='QuestionBookmark',
+        through_fields=('user', 'question'),
+    )
+
+    # 5. 답변 추천/비추천
+
+    # 답변 추천
+    upvoted_answers = models.ManyToManyField(
+        'posts.Answer',
+        related_name='upvoted_users',
+        blank=True,
+        through='AnswerUpVote',
+        through_fields=('user', 'answer'),
+    )
+
+    # 답변 비추천
+    downvoted_answers = models.ManyToManyField(
+        'posts.Answer',
+        related_name='downvoted_users',
+        blank=True,
+        through='AnswerDownVote',
+        through_fields=('user', 'answer'),
+    )
+
+    # 6. 답변 북마크
+    bookmarked_answers = models.ManyToManyField(
+        'posts.Answer',
+        related_name='bookmarked_users',
+        blank=True,
+        through='AnswerBookmark',
+        through_fields=('user', 'answer'),
+    )
+
+    # 7. 댓글 추천/비추천
+
+    # 7-1) 질문에 댓글
+    # 댓글 추천
+    upvoted_question_comments = models.ManyToManyField(
+        'posts.QuestionComment',
+        related_name='upvoted_users',
+        blank=True,
+        through='QuestionCommentUpVote',
+        through_fields=('user', 'comment'),
+    )
+
+    # 댓글 비추천
+    downvoted_question_comments = models.ManyToManyField(
+        'posts.QuestionComment',
+        related_name='downvoted_users',
+        blank=True,
+        through='QuestionCommentDownVote',
+        through_fields=('user', 'comment'),
+    )
+
+    # 7-2) 답변에 댓글
+    # 댓글 추천
+    upvoted_answer_comments = models.ManyToManyField(
+        'posts.AnswerComment',
+        related_name='upvoted_users',
+        blank=True,
+        through='AnswerCommentUpVote',
+        through_fields=('user', 'comment'),
+    )
+
+    # 댓글 비추천
+    downvoted_answer_comments = models.ManyToManyField(
+        'posts.AnswerComment',
+        related_name='downvoted_users',
+        blank=True,
+        through='AnswerCommentDownVote',
+        through_fields=('user', 'comment'),
+    )
+
+    # 7-3) 댓글에 댓글
+    # 댓글 추천
+    upvoted_nested_comments = models.ManyToManyField(
+        'posts.NestedComment',
+        related_name='upvoted_users',
+        blank=True,
+        through='NestedCommentUpVote',
+        through_fields=('user', 'comment'),
+    )
+
+    # 댓글 비추천
+    downvoted_nested_comments = models.ManyToManyField(
+        'posts.NestedComment',
+        related_name='downvoted_users',
+        blank=True,
+        through='NestedCommentDownVote',
+        through_fields=('user', 'comment'),
     )
 
     # 유저 활동
