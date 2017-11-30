@@ -12,7 +12,8 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = (
             'pk',
-            'user',
+            'user_id',
+            'topic_id',
             'content',
             'created_at',
         )
