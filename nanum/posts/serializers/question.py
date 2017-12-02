@@ -11,15 +11,20 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = (
-            'pk',
-            'user_id',
-            'topic_id',
+            'user',
+            'topics',
             'content',
             'created_at',
         )
 
-        read_only_fields = (
-            'user',
-            'content',
-            'created_at',
-        )
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        topics = ret['topics']
+        del ret['topics']
+        data = {
+            'question': ret,
+            'topics': topics,
+        }
+        return data
+
+
