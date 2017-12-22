@@ -7,7 +7,7 @@ from rest_framework import status
 from posts.apis import (
     QuestionListCreateView,
 )
-from ..base import QuestionBaseTest
+from ..test_model import QuestionBaseTest
 
 User = get_user_model()
 

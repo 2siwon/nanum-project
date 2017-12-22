@@ -1,6 +1,6 @@
 from rest_framework import status
 
-from ..base import QuestionBaseTest
+from ..test_model import QuestionBaseTest
 
 
 class QuestionListCreateViewTest(QuestionBaseTest):

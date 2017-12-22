@@ -1,7 +1,7 @@
 from rest_framework import status
 
 from posts.apis import QuestionRetrieveUpdateDestroyView
-from .base import QuestionBaseTest
+from .test_model import QuestionBaseTest
 
 
 class QuestionRetrieveUpdateDestroyViewTest(QuestionBaseTest):

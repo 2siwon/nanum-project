@@ -11,6 +11,9 @@ User = get_user_model()
 
 
 class QuestionBaseTest(APITestCase):
+    """
+    Question과 관련된 모든 데이터를 임의로 생성한다.
+    """
     # QuestionListCreateView
     URL_API_QUESTION_LIST_CREATE_NAME = 'post:question:list'
     URL_API_QUESTION_LIST_CREATE = '/post/question/'

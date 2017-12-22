@@ -1,7 +1,7 @@
 from django.urls import reverse, resolve
 
 from posts.apis import QuestionMainFeedListView
-from .base import QuestionBaseTest
+from .test_model import QuestionBaseTest
 
 
 class QuestionMainFeedListViewTest(QuestionBaseTest):

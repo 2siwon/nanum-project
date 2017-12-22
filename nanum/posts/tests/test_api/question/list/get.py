@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from posts.apis import QuestionFilterListView
-from ..base import QuestionBaseTest
+from ..test_model import QuestionBaseTest
 
 
 class QuestionListViewTest(QuestionBaseTest):
@@ -58,6 +58,9 @@ class QuestionListViewTest(QuestionBaseTest):
         # response로 돌아온 객체들이 각각 count, next, previous, results키를 가지고 있는지 확인
         cur_data = response.data
         self.assertIn('count', cur_data)
+        cur_count_data = cur_data.get('count')
+        self.assertEqual(cur_count_data, question_queryset.count())
+
         self.assertIn('next', cur_data)
         self.assertIn('previous', cur_data)
         self.assertIn('results', cur_data)
@@ -130,15 +133,17 @@ class QuestionListViewTest(QuestionBaseTest):
             self.assertEqual(cur_question_comment_count, question.comment_count)
 
             # question.created_at
-            # 포맷 변경
             created_at_of_question = "{}-{}-{}".format(
                 question.created_at.year, question.created_at.month, question.created_at.day)
             self.assertEqual(cur_question_created_at, created_at_of_question)
 
             # question.modified_at
-            # modified_at_of_question = "{}-{}-{}T{}"
-            # self.assertEqual(cur_question_modified_at, question.modified_at)
-            # datetime.datetime
+            modified_at_of_question = "{}-{}-{}T{}:{}:{}.{}+09:00".format(
+                question.modified_at.year, question.modified_at.month, question.modified_at.day,
+                question.modified_at.hour+9, question.modified_at.minute, question.modified_at.second,
+                question.modified_at.microsecond,
+            )
+            self.assertEqual(cur_question_modified_at, modified_at_of_question)
 
             # ===========results.get('topics') 테스트===========
             topics_list = list()
