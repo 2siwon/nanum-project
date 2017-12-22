@@ -1,13 +1,10 @@
+import datetime
 import json
 
-from django.core import serializers
-from django.http import JsonResponse
 from django.urls import reverse
 from rest_framework import status
 
 from posts.apis import QuestionFilterListView
-from posts.models import Question
-from posts.serializers import QuestionGetSerializer
 from ..base import QuestionBaseTest
 
 
@@ -26,17 +23,6 @@ class QuestionListViewTest(QuestionBaseTest):
     """
     VIEW_CLASS = QuestionFilterListView
 
-    def test_get_question_base(self):
-
-        # 유저 생성(queryset 리턴)
-        users_queryset = self.create_random_users()
-        # 토픽 생성
-        topics_queryset = self.create_random_topics(users_queryset)
-        # 질문 생성
-        question_queryset = self.create_random_questions(users_queryset, topics_queryset)
-
-        return question_queryset
-
     def test_get_pagination_question(self):
         """
         QuestionList의 Get요청에 대한 테스트
@@ -47,11 +33,18 @@ class QuestionListViewTest(QuestionBaseTest):
         pagination 테스트를 하려면 Question이 생성되어 있어야 하므로
         Question 객체들을 생성 후 리스트를 가져오는 테스트를 선행한다.
         """
-        print("\n\n**********QuestionList의 Get요청에 대한 테스트입니다.*********\n")
-        print("\n\n**********QuestionList의 Pagination에 대한 테스트입니다.*********\n")
+
+        # 유저 생성(queryset 리턴)
+        users_queryset = self.create_random_users()
+        # 토픽 생성
+        topics_queryset = self.create_random_topics(users_queryset)
+        # 질문 생성
+        question_queryset = self.create_random_questions(users_queryset, topics_queryset)
+
+        print("\n\n**********QuestionList의 Get요청(Pagination포함)에 대한 테스트입니다.*********\n")
 
         # Question list를 가져오는 테스트 선행
-        question_queryset = self.test_get_question_base()
+        # question_queryset = self.test_get_question_base()
 
         # /post/question/
         url = reverse(self.URL_API_QUESTION_LIST_CREATE_NAME)
@@ -106,22 +99,46 @@ class QuestionListViewTest(QuestionBaseTest):
             cur_question_content = cur_question_data.get('content')
             cur_question_url = cur_question_data.get('url')
             cur_question_user = cur_question_data.get('user')
+            cur_question_bookmark_count = cur_question_data.get('bookmark_count')
+            cur_question_comment_count = cur_question_data.get('comment_count')
+            cur_question_created_at = cur_question_data.get('created_at')
+            cur_question_modified_at = cur_question_data.get('modified_at')
 
-            # question.pk 테스트
-            question_queryset_pk = question_queryset.get(pk=cur_question_pk).pk
+            # 현재 테스트 할 Question 객체
+            question = question_queryset.get(pk=cur_question_pk)
+
+            # question.pk
+            question_queryset_pk = question.pk
             self.assertEqual(cur_question_pk, question_queryset_pk)
 
-            # question.content 테스트
-            question_queryset_content = question_queryset.get(pk=cur_question_pk).content
+            # question.content
+            question_queryset_content = question.content
             self.assertEqual(cur_question_content, question_queryset_content)
 
-            # question.url 테스트
+            # question.url
             question_queryset_url = f'http://testserver/post/question/{cur_question_pk}/'
             self.assertEqual(cur_question_url, question_queryset_url)
 
-            # question.user 테스트
+            # question.user
             question_queryset_user = f'http://testserver/user/{cur_question_pk}/profile/main-detail/'
             self.assertEqual(cur_question_user, question_queryset_user)
+
+            # question.bookmark_count
+            self.assertEqual(cur_question_bookmark_count, question.bookmark_count)
+
+            # question.comment_count
+            self.assertEqual(cur_question_comment_count, question.comment_count)
+
+            # question.created_at
+            # 포맷 변경
+            created_at_of_question = "{}-{}-{}".format(
+                question.created_at.year, question.created_at.month, question.created_at.day)
+            self.assertEqual(cur_question_created_at, created_at_of_question)
+
+            # question.modified_at
+            # modified_at_of_question = "{}-{}-{}T{}"
+            # self.assertEqual(cur_question_modified_at, question.modified_at)
+            # datetime.datetime
 
             # ===========results.get('topics') 테스트===========
             topics_list = list()
@@ -129,8 +146,7 @@ class QuestionListViewTest(QuestionBaseTest):
             # 테스트 arguments
             cur_topics_data = cur_results_data.get('topics')
 
-            # topics 테스트
-            question = question_queryset.get(pk=cur_question_pk)
+            # topics
             topics = question.topics.all()
 
             for topic in topics:
