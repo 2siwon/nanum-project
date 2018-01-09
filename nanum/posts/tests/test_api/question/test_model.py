@@ -66,7 +66,7 @@ class QuestionBaseTest(APITestCase):
             content=content,
         )
 
-    # 랜덤한 다수의 유저 생성 테스트
+    # 랜덤한 다수의 유저 생성
     def create_random_users(self, is_none=False):
         """
         랜덤한 수의 유저를 생성한다.
@@ -94,7 +94,7 @@ class QuestionBaseTest(APITestCase):
 
         return User.objects.filter(pk__in=user_list)
 
-    # 랜덤한 다수의 토픽 생성 테스트
+    # 랜덤한 다수의 토픽 생성
     def create_random_topics(self, users_queryset):
         """
         1. 유저의 pk의 값으로 랜덤한 수의 토픽을 생성한다.
@@ -129,7 +129,7 @@ class QuestionBaseTest(APITestCase):
 
         return Topic.objects.filter(pk__in=topic_list)
 
-    # 랜덤한 다수의 질문 생성 테스트
+    # 랜덤한 다수의 질문 생성
     def create_random_questions(self, users_queryset, topics_queryset):
         """
         1. 질문에 추가 할 토픽들을 만든다.
